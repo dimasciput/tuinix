@@ -25,7 +25,6 @@ Action Taken:
   - Claude configuration files for future sessions
   - Initial commit and GitHub repository creation
 
-================================================================================
 
 Date: 2025-12-03
 Session: Quality Assurance Setup
@@ -296,9 +295,31 @@ Final Project State:
 ✅ All tests passing successfully
 ✅ Scalable architecture supporting unlimited hosts without code changes
 
+
 ================================================================================
 
+Prompt:
+On GitHub - README Enhancement
 
+I want to make my readme.md a bit more professional and appealing to the
+community. It should have a nice header with the logo, a short description of
+the project, badges showing project health (build status, code coverage,
+license etc) and a nice welcome message that explains the ethos of the project
+and why people should get involved. Make sure to include links to all relevant
+documentation in the .github folder.
 
+It should also have badges showing the status of all the QA checks we have set
+up. The badges should also show things like the progams and projects we use to
+do the qa (eg precommit, nixpkgs-fmt, shellcheck etc) and nix etc.
 
+It should be inspired by projects like Awesome Readme to make it the very best
+readme possible.
 
+I want the contributors to be a table because I am hoping more will come!
+Include their github avatars and links to their github pages.
+
+Add an automated step (in a release workflow or a small script) to regenerate
+the contributors table from GitHub's API so it stays in sync;
+
+Open a pull request with this README change for you, or push it directly if you
+prefer (tell me which repo/branch to target and I'll create the PR).

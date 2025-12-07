@@ -76,5 +76,6 @@ yarn-error.log*
 .cache/
 *.cache
 
+# VM and core files
 *.qcow2
 core
