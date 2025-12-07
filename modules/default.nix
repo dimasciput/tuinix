@@ -2,10 +2,6 @@
 { lib, ... }:
 
 {
-  imports = [
-    ./nixmywindows
-    ./system
-    ./security
-    ./networking
-  ];
+  imports = [ ./system ./security ./networking ];
 }
+

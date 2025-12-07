@@ -7,7 +7,7 @@
     isNormalUser = true;
     description = "System Administrator";
     extraGroups = [ "wheel" "systemd-journal" "docker" ];
-    shell = pkgs.zsh;
+    shell = pkgs.fish;
 
     # Home directory
     home = "/home/admin";
@@ -53,17 +53,20 @@
 
     # Shell configuration
     programs = {
-      # Zsh configuration for admin
-      zsh = {
+      # Fish configuration for admin
+      fish = {
         enable = true;
-        enableCompletion = true;
-        enableSyntaxHighlighting = true;
-
-        oh-my-zsh = {
-          enable = true;
-          theme = "agnoster";
-          plugins = [ "git" "sudo" "systemd" "docker" ];
-        };
+        plugins = [
+          {
+            name = "fzf-fish";
+            src = pkgs.fetchFromGitHub {
+              owner = "PatrickF1";
+              repo = "fzf.fish";
+              rev = "8920367cf85eee5218cc25a11e209d46e2591e7a";
+              sha256 = "sha256-T8KYLA/r/gOKvAivKRoeqIwE2pINlxFQtZJHpOy9GMM=";
+            };
+          }
+        ];
       };
 
       # Git configuration

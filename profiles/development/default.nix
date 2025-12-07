@@ -68,7 +68,6 @@
     # Shell utilities
     tmux
     screen
-    zsh
     fish
     
     # File management
@@ -115,7 +114,6 @@
     };
     
     # Shell configuration
-    zsh.enable = true;
     fish.enable = true;
   };
 }

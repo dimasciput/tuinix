@@ -2,9 +2,6 @@
 { lib, ... }:
 
 {
-  imports = [
-    ./boot.nix
-    ./locale.nix
-    ./nix-settings.nix
-  ];
+  imports = [ ./boot.nix ./nix-settings.nix ./shell.nix ./zfs.nix ];
 }
+

@@ -7,17 +7,21 @@
     (modulesPath + "/installer/cd-dvd/channel.nix")
   ];
 
-  # Disable ZFS for ISO images (causes build issues)
-  nixmywindows.zfs.enable = lib.mkForce false;
   
   # Override filesystem configuration for ISO
-  fileSystems = lib.mkForce { };
+  fileSystems = lib.mkForce {
+    "/" = {
+      device = "tmpfs";
+      fsType = "tmpfs";
+      options = [ "mode=0755" ];
+    };
+  };
   swapDevices = lib.mkForce [ ];
   
   # Basic ISO configuration
   isoImage = {
     # ISO metadata
-    isoName = lib.mkForce "${config.nixmywindows.hostname}-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}.iso";
+    isoName = lib.mkForce "nixmywindows-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}.iso";
     
     # Compression
     compressImage = true;
@@ -42,7 +46,7 @@
           4. Mount your filesystems
           5. Generate hardware config: nixos-generate-config --root /mnt
           6. Copy nixmywindows configuration to /mnt/etc/nixos/
-          7. Install: nixos-install --flake /mnt/etc/nixos#${config.nixmywindows.hostname}
+          7. Install: nixos-install --flake /mnt/etc/nixos#${config.networking.hostName}
           
           For more information, visit:
           https://github.com/timlinux/nixmywindows
@@ -109,14 +113,6 @@
     firewall.enable = lib.mkForce false;
   };
   
-  # Disable custom nixmywindows modules that might conflict with installer
-  nixmywindows = {
-    security.firewall.enable = lib.mkForce false;
-    networking = {
-      ethernet.enable = lib.mkForce false;
-      wireless.enable = lib.mkForce false;
-    };
-  };
 
   # System configuration
   system.stateVersion = "24.05";

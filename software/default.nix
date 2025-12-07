@@ -2,10 +2,6 @@
 { lib, ... }:
 
 {
-  imports = [
-    ./terminal
-    ./development
-    ./system
-    ./security
-  ];
+  imports = [ ./terminal ./development ./system ./security ];
 }
+

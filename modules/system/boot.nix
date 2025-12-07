@@ -10,7 +10,7 @@
         configurationLimit = 10;
       };
       efi.canTouchEfiVariables = lib.mkDefault true;
-      timeout = 5;
+      timeout = lib.mkDefault 5;
     };
     
     # Kernel configuration

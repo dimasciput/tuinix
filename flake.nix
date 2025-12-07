@@ -4,12 +4,12 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
-    
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -18,35 +18,36 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, nixos-hardware, disko, home-manager, flake-utils, ... }@inputs:
+  outputs = { self, nixpkgs, nixos-hardware, disko, home-manager, flake-utils
+    , ... }@inputs:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       lib = nixpkgs.lib;
-      
+
       # Dynamically discover hosts from the hosts directory
       hostsDir = ./hosts;
       hostNames = builtins.attrNames (builtins.readDir hostsDir);
-      
+
       # Helper function to create NixOS configurations
-      mkNixosConfig = hostname: extraModules: nixpkgs.lib.nixosSystem {
-        inherit system;
-        specialArgs = { 
-          inherit inputs hostname;
-          inherit (nixpkgs) lib;
+      mkNixosConfig = hostname: extraModules:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = {
+            inherit inputs hostname;
+            inherit (nixpkgs) lib;
+          };
+          modules = [
+            disko.nixosModules.disko
+            home-manager.nixosModules.home-manager
+            ./modules
+            (hostsDir + "/${hostname}")
+          ] ++ extraModules;
         };
-        modules = [
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          ./modules
-          (hostsDir + "/${hostname}")
-        ] ++ extraModules;
-      };
-      
+
       # Generate configurations for all discovered hosts
-      mkHostConfigs = extraModules: lib.genAttrs hostNames (hostname: 
-        mkNixosConfig hostname extraModules
-      );
+      mkHostConfigs = extraModules:
+        lib.genAttrs hostNames (hostname: mkNixosConfig hostname extraModules);
 
       # Development tools for the flake environment
       devTools = with pkgs; [
@@ -56,27 +57,27 @@
         nix-diff
         statix
         deadnix
-        
+
         # Development utilities
         git
         direnv
         pre-commit
-        
+
         # System tools
         age
         ssh-to-age
-        
+
         # Shell and terminal tools
         shellcheck
         shfmt
-        
+
         # Documentation tools
         mdbook
         markdownlint-cli
-        
+
         # Security tools
         sops
-        
+
         # Build tools
         gnumake
       ];
@@ -85,7 +86,7 @@
       # Development shell
       devShells.default = pkgs.mkShell {
         buildInputs = devTools;
-        
+
         shellHook = ''
           echo "🚀 nixmywindows development environment"
           echo ""
@@ -101,7 +102,7 @@
           echo "  • shellcheck - Shell script analysis"
           echo "  • pre-commit - Git hooks"
           echo ""
-          
+
           # Set up direnv if not already done
           if [ ! -f .envrc ]; then
             echo "use flake" > .envrc
@@ -115,36 +116,31 @@
       formatter = pkgs.nixfmt-classic;
 
       # Packages
-      packages = 
+      packages =
         # VM runners for each host (with VM-specific overrides)
         (lib.genAttrs (map (name: "vm-${name}") hostNames) (vmName:
           let hostname = lib.removePrefix "vm-" vmName;
-          in (mkNixosConfig hostname [ ./profiles/vm ]).config.system.build.vm
-        )) //
-        
+          in (mkNixosConfig hostname [ ./profiles/vm ]).config.system.build.vm))
+        //
+
         # ISO images (only for configurations that have ISO support)
-        (lib.mapAttrs' (hostname: config: 
-          lib.nameValuePair "${hostname}" config.config.system.build.isoImage
-        ) (lib.filterAttrs (name: _: lib.hasPrefix "iso-" name) self.nixosConfigurations));
+        (lib.mapAttrs' (hostname: config:
+          lib.nameValuePair "${hostname}" config.config.system.build.isoImage)
+          (lib.filterAttrs (name: _: lib.hasPrefix "iso-" name)
+            self.nixosConfigurations));
 
     }) // {
-      
+
       # NixOS configurations (dynamically generated)
-      nixosConfigurations = 
+      nixosConfigurations =
         # Regular host configurations
-        (mkHostConfigs []) //
-        
+        (mkHostConfigs [ ]) //
+
         # ISO configurations for installation
         (lib.genAttrs (map (name: "iso-${name}") hostNames) (isoName:
           let hostname = lib.removePrefix "iso-" isoName;
-          in mkNixosConfig hostname [ ./iso-image.nix ]
-        ));
-
-      # Modules that can be imported by other flakes
-      nixosModules = {
-        default = ./modules;
-        nixmywindows = ./modules/nixmywindows;
-      };
+          in mkNixosConfig hostname [ ./iso-image.nix ]));
 
     };
 }
+

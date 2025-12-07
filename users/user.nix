@@ -7,7 +7,7 @@
     isNormalUser = true;
     description = "user user";
     extraGroups = [ "wheel" "networkmanager" "audio" "video" ];
-    shell = pkgs.zsh;
+    shell = pkgs.fish;
 
     # Home directory
     home = "/home/user";
@@ -50,24 +50,26 @@
 
       # Shell configuration
       programs = {
-        # Zsh configuration
-        zsh = {
+        # Fish configuration
+        fish = {
           enable = true;
-          enableCompletion = true;
-          enableSyntaxHighlighting = true;
-          enableVteIntegration = true;
-
-          oh-my-zsh = {
-            enable = true;
-            theme = "robbyrussell";
-            plugins = [ "git" "sudo" "docker" ];
-          };
+          plugins = [
+            {
+              name = "fzf-fish";
+              src = pkgs.fetchFromGitHub {
+                owner = "PatrickF1";
+                repo = "fzf.fish";
+                rev = "8920367cf85eee5218cc25a11e209d46e2591e7a";
+                sha256 = "sha256-T8KYLA/r/gOKvAivKRoeqIwE2pINlxFQtZJHpOy9GMM=";
+              };
+            }
+          ];
         };
 
         # Starship prompt
         starship = {
           enable = true;
-          enableZshIntegration = true;
+          enableFishIntegration = true;
         };
 
         # Git configuration
@@ -102,7 +104,6 @@
         # Direnv
         direnv = {
           enable = true;
-          enableZshIntegration = true;
           nix-direnv.enable = true;
         };
       };
