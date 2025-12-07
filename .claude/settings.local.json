@@ -3,7 +3,9 @@
     "allow": [
       "Bash(git init:*)",
       "Bash(mkdir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(nix flake check:*)"
     ],
     "deny": [],
     "ask": []
