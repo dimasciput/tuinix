@@ -94,7 +94,7 @@ validate_iso() {
 }
 
 # Build the ISO
-nix build .#nixosConfigurations.iso-laptop.config.system.build.isoImage
+nix build .#nixosConfigurations.installer.config.system.build.isoImage
 
 # Check if build was successful
 if [[ -L "result" && -d "result/iso" ]]; then

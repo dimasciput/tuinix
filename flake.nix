@@ -137,9 +137,19 @@
         (mkHostConfigs [ ]) //
 
         # ISO configurations for installation
-        (lib.genAttrs (map (name: "iso-${name}") hostNames) (isoName:
-          let hostname = lib.removePrefix "iso-" isoName;
-          in mkNixosConfig hostname [ ./iso-image.nix ]));
+        {
+          "installer" = nixpkgs.lib.nixosSystem {
+            inherit system;
+            specialArgs = {
+              inherit inputs;
+              hostname = "nixos";
+              inherit (nixpkgs) lib;
+            };
+            modules = [
+              ./installer.nix
+            ];
+          };
+        };
 
     };
 }
