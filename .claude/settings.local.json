@@ -5,7 +5,8 @@
       "Bash(mkdir:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(nix flake check:*)"
+      "Bash(nix flake check:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
