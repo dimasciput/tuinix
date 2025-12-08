@@ -37,21 +37,25 @@
         source = pkgs.writeText "README" ''
           nixmywindows Installation ISO
           
-          This is a nixmywindows installation ISO image.
+          This is a nixmywindows installation ISO image with the configuration included.
           
           To install:
           1. Boot from this ISO
           2. Run 'sudo -i' to become root
-          3. Partition your disk
+          3. Partition your disk (or use the included disk configuration)
           4. Mount your filesystems
-          5. Generate hardware config: nixos-generate-config --root /mnt
-          6. Copy nixmywindows configuration to /mnt/etc/nixos/
-          7. Install: nixos-install --flake /mnt/etc/nixos#${config.networking.hostName}
+          5. Install: nixos-install --flake /nixmywindows#${config.networking.hostName}
+          
+          The nixmywindows configuration is available at /nixmywindows
           
           For more information, visit:
           https://github.com/timlinux/nixmywindows
         '';
         target = "/README.txt";
+      }
+      {
+        source = ./.;
+        target = "/nixmywindows";
       }
     ];
   };
@@ -99,6 +103,7 @@
   };
   
   # Set root password for SSH access during installation
+  users.users.root.initialHashedPassword = lib.mkForce null;
   users.users.root.password = "nixmywindows";
   
   # Network configuration for installer

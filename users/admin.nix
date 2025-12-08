@@ -18,70 +18,30 @@
       # Add administrative SSH keys here
       # Example: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5... admin@hostname"
     ];
-
-    # Password authentication disabled by default
-    # Use SSH keys for authentication
+    initialPassword = "admin";
   };
 
   # Enable home-manager for admin user
   home-manager.users.admin = { pkgs, ... }: {
     # Admin-specific packages
-    home.packages = with pkgs; [
-      # System administration
-      htop
-      iotop
-      nethogs
-
-      # Security tools
-      nmap
-      tcpdump
-
-      # Network tools
-      curl
-      wget
-      rsync
-
-      # Development tools
-      git
-      vim
-
-      # Archive tools
-      zip
-      unzip
-      p7zip
-    ];
+    home.packages = with pkgs; [ ];
 
     # Shell configuration
     programs = {
       # Fish configuration for admin
       fish = {
         enable = true;
-        plugins = [
-          {
-            name = "fzf-fish";
-            src = pkgs.fetchFromGitHub {
-              owner = "PatrickF1";
-              repo = "fzf.fish";
-              rev = "8920367cf85eee5218cc25a11e209d46e2591e7a";
-              sha256 = "sha256-T8KYLA/r/gOKvAivKRoeqIwE2pINlxFQtZJHpOy9GMM=";
-            };
-          }
-        ];
+        plugins = [{
+          name = "fzf-fish";
+          src = pkgs.fetchFromGitHub {
+            owner = "PatrickF1";
+            repo = "fzf.fish";
+            rev = "8920367cf85eee5218cc25a11e209d46e2591e7a";
+            sha256 = "sha256-T8KYLA/r/gOKvAivKRoeqIwE2pINlxFQtZJHpOy9GMM=";
+          };
+        }];
       };
 
-      # Git configuration
-      git = {
-        enable = true;
-        userName = "Administrator";
-        userEmail = "admin@localhost";
-      };
-
-      # Tmux configuration
-      tmux = {
-        enable = true;
-        clock24 = true;
-        keyMode = "vi";
-      };
     };
 
     # Home Manager state version

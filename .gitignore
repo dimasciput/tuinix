@@ -78,4 +78,6 @@ yarn-error.log*
 
 # VM and core files
 *.qcow2
+*.iso
+result/*
 core

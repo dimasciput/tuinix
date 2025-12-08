@@ -14,7 +14,7 @@
     };
     
     # Kernel configuration
-    kernelPackages = lib.mkDefault pkgs.linuxPackages_latest;
+    kernelPackages = lib.mkDefault pkgs.linuxPackages_6_17;
     
     # Clean /tmp on boot
     tmp.cleanOnBoot = true;
