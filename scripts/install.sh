@@ -146,36 +146,43 @@ collect_user_input() {
     gum style --foreground="#00cc00" "Generated ZFS Host ID: $HOST_ID"
     
     # Get disk size for space calculations
-    local disk_size_gb
-    disk_size_gb=$(lsblk -d -n -o SIZE "$DISK" | sed 's/G//' | sed 's/T/*1024/' | bc 2>/dev/null || echo "500")
-    
-    # Extract numeric values from space variables
-    local boot_gb=$(echo "$SPACE_BOOT" | sed 's/G//')
-    local atuin_gb=$(echo "$SPACE_ATUIN" | sed 's/G//')
-    
-    local available_space=$((disk_size_gb - boot_gb - atuin_gb))  # Subtract boot and atuin space
-    
-    # Space allocation
     echo ""
-    gum style --foreground="#0066cc" "📊 Disk Space Allocation"
+    gum style --foreground="#0066cc" "📊 Calculating Disk Space Allocation"
     
-    # /nix partition
-    SPACE_NIX=$(gum input \
-        --placeholder="$SPACE_NIX" \
-        --prompt="/nix space (default ${SPACE_NIX}): " \
-        --value="$SPACE_NIX")
+    local disk_size_bytes
+    disk_size_bytes=$(lsblk -d -n -b -o SIZE "$DISK")
+    local disk_size_gb=$((disk_size_bytes / 1024 / 1024 / 1024))
     
-    # Calculate remaining space
-    local nix_gb
-    nix_gb=$(echo "$SPACE_NIX" | sed 's/G//')
-    local remaining=$((available_space - nix_gb))
+    gum style --foreground="#00cc00" "Disk size: ${disk_size_gb}GB"
     
-    # /var/atuin is fixed at 50G, so just inform
-    gum style --foreground="#666666" "/var/atuin: $SPACE_ATUIN (fixed)"
+    # Calculate space allocation based on percentages
+    local boot_gb=5  # Fixed 5GB for boot
+    local nix_gb=$((disk_size_gb * 5 / 100))  # 5% of disk for /nix
+    local atuin_gb=$((disk_size_gb * 5 / 10000))  # 0.05% of disk for /var/atuin (minimum 1GB)
     
-    # /home gets the rest
-    SPACE_HOME="${remaining}G"
-    gum style --foreground="#666666" "/home: $SPACE_HOME (remaining space)"
+    # Ensure minimum sizes
+    if [[ $nix_gb -lt 20 ]]; then
+        nix_gb=20  # Minimum 20GB for /nix
+    fi
+    if [[ $atuin_gb -lt 1 ]]; then
+        atuin_gb=1  # Minimum 1GB for atuin
+    fi
+    
+    # Home gets the rest
+    local home_gb=$((disk_size_gb - boot_gb - nix_gb - atuin_gb))
+    
+    # Set global variables
+    SPACE_BOOT="${boot_gb}G"
+    SPACE_NIX="${nix_gb}G" 
+    SPACE_ATUIN="${atuin_gb}G"
+    SPACE_HOME="${home_gb}G"
+    
+    gum style --foreground="#666666" \
+        "Automatic space allocation:" \
+        "  /boot: $SPACE_BOOT (fixed)" \
+        "  /nix: $SPACE_NIX (5% of disk)" \
+        "  /var/atuin: $SPACE_ATUIN (0.05% of disk)" \
+        "  /home: $SPACE_HOME (remaining space)"
     
     # Locale and keyboard
     echo ""
@@ -273,6 +280,16 @@ show_summary() {
 
 # Generate host configuration
 generate_host_config() {
+    # Copy flake to writable location first
+    local work_dir="/tmp/nixmywindows-install"
+    gum style --foreground="#0066cc" "📁 Copying flake to writable location: $work_dir"
+    
+    rm -rf "$work_dir"
+    cp -r "$PROJECT_ROOT" "$work_dir"
+    
+    # Update PROJECT_ROOT to point to writable copy
+    PROJECT_ROOT="$work_dir"
+    
     local host_dir="$PROJECT_ROOT/hosts/$HOSTNAME"
     
     gum style --foreground="#0066cc" "📁 Generating host configuration in $host_dir"
@@ -453,6 +470,26 @@ copy_flake() {
     gum style --foreground="#00cc00" "✅ Flake copied to new system"
 }
 
+# Copy flake to user home directory
+copy_flake_to_user() {
+    gum style --foreground="#0066cc" "📦 Copying flake to user home directory"
+    
+    # Create user's nixmywindows directory  
+    local user_dir="/mnt/home/user/nixmywindows"
+    mkdir -p "$user_dir"
+    
+    # Copy entire flake including the new host config
+    cp -r "$PROJECT_ROOT"/* "$user_dir/"
+    
+    # Set proper ownership for the user
+    chown -R 1000:1000 "$user_dir"
+    
+    # Create a symlink for easy access
+    nixos-enter --root /mnt --command "ln -sf /home/user/nixmywindows /etc/nixmywindows-user"
+    
+    gum style --foreground="#00cc00" "✅ Flake copied to user home: /home/user/nixmywindows"
+}
+
 # Setup root password
 setup_root_password() {
     gum style --foreground="#0066cc" "🔑 Setting up root password"
@@ -500,6 +537,7 @@ main() {
     generate_hardware_config
     install_nixos
     copy_flake
+    copy_flake_to_user
     setup_root_password
     
     complete_installation

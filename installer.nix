@@ -19,16 +19,8 @@
       target = "/install.sh";
     }
     {
-      source = ./scripts/disko-vda.nix;
-      target = "/nixmywindows/scripts/disko-vda.nix";
-    }
-    {
-      source = ./scripts/disko-sda.nix;
-      target = "/nixmywindows/scripts/disko-sda.nix";
-    }
-    {
-      source = ./scripts/disko-nvme.nix;
-      target = "/nixmywindows/scripts/disko-nvme.nix";
+      source = ./templates/disko-template.nix;
+      target = "/nixmywindows/templates/disko-template.nix";
     }
   ];
 
@@ -45,11 +37,21 @@
     dosfstools
     zfs
     disko
+    gum  # For rich interactive UX in install script
+    bc   # For space calculations in install script
   ];
 
   # Enable SSH
   services.openssh.enable = true;
-  users.users.root.password = "nixos";
+  
+  # Set root password (override any defaults)
+  users.users.root = {
+    password = "nixos";
+    initialHashedPassword = lib.mkForce null;
+    hashedPassword = lib.mkForce null;
+    hashedPasswordFile = lib.mkForce null;
+    initialPassword = lib.mkForce null;
+  };
 
   # Network configuration
   networking.useDHCP = lib.mkForce true;

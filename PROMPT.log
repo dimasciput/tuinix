@@ -403,3 +403,46 @@ FINAL RESULT:
 ✅ Complete host configuration generation from templates
 ✅ Flexible space allocation and hardware detection
 ✅ Full installation pipeline from user input to bootable system
+
+================================================================================
+Date: 2025-12-09
+Session: Installation Process Fixes
+
+USER REQUEST: Fix installation process issues from screenshot.png
+
+Issues identified from actual installation attempt:
+1. User never got prompted for the sizes of atuin and home datasets
+2. Nix dataset should default to 5% of disk size (not hardcoded 250G)
+3. Atuin dataset should default to 0.05% of disk size (not hardcoded 50G)
+4. Boot size should be fixed as per the template (not configurable)
+5. Home should consume the rest (after boot, nix, atuin)
+6. The actual size of the disk should be used instead of defaulting to 250G
+7. The whole flake needs to be copied to a read-write area of the disk and then the template applied to add the host otherwise we get a read-only filesystem error
+8. Remember to copy the flake with the newly created host dir into the home/user directory after the nixos installation so that it is available to the user after their first reboot
+
+Screenshot shows:
+- Space allocation showing /nix: 5G and /home: -19G (negative space!)
+- Read-only filesystem error when trying to create host configuration 
+- Fixed sizes that don't scale with actual disk capacity
+
+ACTION TAKEN:
+✅ Fixed space calculation logic:
+   - Now uses actual disk size from lsblk instead of defaulting to 250G
+   - Boot: Fixed 5GB (not user configurable)
+   - Nix: 5% of disk size (minimum 20GB)
+   - Atuin: 0.05% of disk size (minimum 1GB)
+   - Home: Remaining space automatically calculated
+   - Removed all user prompts for space allocation - now fully automatic
+
+✅ Fixed read-only filesystem error:
+   - Copy entire flake to /tmp/nixmywindows-install (writable) before generating host config
+   - Generate host configuration in writable location
+   - Then copy completed flake to final locations
+
+✅ Added user home directory copy:
+   - Copy final flake with new host config to /home/user/nixmywindows
+   - Set proper ownership (1000:1000 for user)
+   - Create symlink /etc/nixmywindows-user for easy access
+   - Ensures user has access to flake after first reboot
+
+RESULT: Installation process now handles disk sizing intelligently and avoids filesystem permission issues.
