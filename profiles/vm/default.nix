@@ -3,7 +3,6 @@
 
 {
   # Enable ZFS for minimal VM
-  nixmywindows.zfs.enable = lib.mkForce true;
 
   # Boot essentials only with stable kernel for ZFS compatibility
   boot = {

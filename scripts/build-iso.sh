@@ -11,23 +11,49 @@ VERSION="${NIXMYWINDOWS_VERSION:-v1}"
 
 # Check if gum is available
 if ! command -v gum >/dev/null 2>&1; then
-    echo "❌ gum is required for this script"
-    echo "Install with: nix profile install nixpkgs#gum"
-    exit 1
+  echo "❌ gum is required for this script"
+  echo "Install with: nix profile install nixpkgs#gum"
+  exit 1
 fi
 
 gum style \
-    --foreground="#e95420" \
-    --border="rounded" \
-    --margin="1" \
-    --padding="1" \
-    "🚀 nixmywindows ISO Builder" \
-    "" \
-    "Building bootable ISO with embedded flake" \
-    "Working directory: $PROJECT_ROOT" \
-    "Version: $VERSION"
+  --foreground="#e95420" \
+  --border="rounded" \
+  --margin="1" \
+  --padding="1" \
+  "🚀 nixmywindows ISO Builder" \
+  "" \
+  "Building bootable ISO with embedded flake" \
+  "Working directory: $PROJECT_ROOT" \
+  "Version: $VERSION"
 
 cd "$PROJECT_ROOT"
+
+# Clean up previous build artifacts
+gum style --foreground="#0066cc" "🧹 Cleaning up previous build artifacts..."
+
+# Remove existing result symlink
+if [[ -L "result" ]]; then
+  rm result
+  gum style --foreground="#00cc00" "  ✅ Removed previous build result"
+fi
+
+# Remove any existing ISO files
+for iso_file in nixmywindows.*.iso; do
+  if [[ -f "$iso_file" ]]; then
+    rm "$iso_file"
+    gum style --foreground="#00cc00" "  ✅ Removed previous ISO: $iso_file"
+  fi
+done
+
+# Clean up any leftover validation mount points
+if [[ -d "/tmp/nixmywindows-iso-validation" ]]; then
+  sudo umount /tmp/nixmywindows-iso-validation 2>/dev/null || true
+  sudo rmdir /tmp/nixmywindows-iso-validation 2>/dev/null || true
+  gum style --foreground="#00cc00" "  ✅ Cleaned up validation mount point"
+fi
+
+echo ""
 
 # Function to validate ISO contents
 validate_iso() {
@@ -81,11 +107,12 @@ validate_iso() {
   fi
 
   # Check for installation README
-  if [[ -f "$mount_point/README.txt" ]]; then
+  if [[ -f "$mount_point/nixmywindows/README.txt" ]]; then
     validation_results+=("✅ Installation README found")
   else
     validation_results+=("❌ Missing installation README")
     validation_failed=1
+    eza --extended --tree --icons=always "$mount_point"
   fi
 
   # Check for nix store
@@ -116,23 +143,34 @@ validate_iso() {
   fi
 }
 
+# Generate build information
+gum style --foreground="#0066cc" "📋 Generating build information..."
+if [[ -x "$PROJECT_ROOT/scripts/build-version.sh" ]]; then
+  cd "$PROJECT_ROOT"
+  scripts/build-version.sh
+  gum style --foreground="#00cc00" "  ✅ Build information generated"
+else
+  gum style --foreground="#ff0000" "  ❌ Build version script not found or not executable"
+  exit 1
+fi
+
 # Build the ISO
 gum style \
-    --foreground="#e95420" \
-    --border="rounded" \
-    --padding="1" \
-    "🏗️  nixmywindows ISO Build" \
-    "" \
-    "Starting comprehensive build process..." \
-    "This may take 10-30 minutes depending on your system"
+  --foreground="#e95420" \
+  --border="rounded" \
+  --padding="1" \
+  "🏗️  nixmywindows ISO Build" \
+  "" \
+  "Starting comprehensive build process..." \
+  "This may take 10-30 minutes depending on your system"
 
 echo ""
 
 # Use gum's simple and reliable spinner
 if ! gum spin --spinner="dot" --title="Building ISO image (this may take a while)..." --show-output -- nix build .#nixosConfigurations.installer.config.system.build.isoImage; then
-    echo ""
-    gum style --foreground="#ff0000" --border="rounded" --padding="1" "❌ ISO build failed!" "Check the output above for error details."
-    exit 1
+  echo ""
+  gum style --foreground="#ff0000" --border="rounded" --padding="1" "❌ ISO build failed!" "Check the output above for error details."
+  exit 1
 fi
 
 echo ""
@@ -191,7 +229,7 @@ if [[ -L "result" && -d "result/iso" ]]; then
 
   # Show final information
   ISO_SIZE=$(du -h "./$FINAL_ISO_NAME" | cut -f1)
-  
+
   gum style \
     --foreground="#e95420" \
     --border="rounded" \
@@ -211,4 +249,3 @@ else
   gum style --foreground="#ff0000" "❌ ISO build failed or result not found"
   exit 1
 fi
-

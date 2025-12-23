@@ -3,7 +3,7 @@ nixmywindows Installation ISO
 This ISO contains the nixmywindows NixOS configuration for laptop installations.
 
 QUICK INSTALLATION (Recommended):
-  sudo /install.sh
+  sudo /nixmywindows/scripts/install.sh
 
 This automated script will guide you through:
 - Disk selection and formatting with ZFS

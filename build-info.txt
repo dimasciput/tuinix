@@ -1,6 +1,6 @@
 nixmywindows Build Information
 ==============================
-Version: d71fd27-dirty
-Build Date: 2025-12-22 18:13:54 UTC
-Commit: d71fd27 (main)
+Version: bd9def3-dirty
+Build Date: 2025-12-23 00:32:36 UTC
+Commit: bd9def3 (main)
 Builder: timlinux@abyss-laptop

@@ -57,9 +57,27 @@ check_root() {
     fi
 }
 
+# Show build information
+show_build_info() {
+    if [[ -f "/build-info.txt" ]]; then
+        echo ""
+        gum style \
+            --foreground="#00cc00" \
+            --border="rounded" \
+            --padding="1" \
+            --margin="1" \
+            "$(cat /build-info.txt)"
+        echo ""
+    else
+        echo "Build info not available"
+    fi
+}
+
 # Welcome screen
 show_welcome() {
     clear
+    show_build_info
+    
     gum style \
         --foreground="#e95420" \
         --border="rounded" \

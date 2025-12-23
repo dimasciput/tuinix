@@ -36,11 +36,15 @@
     }
     {
       source = ./README.txt;
-      target = "/README.txt";
+      target = "/nixmywindows/README.txt";
     }
     {
-      source = ./scripts/install.sh;
-      target = "/install.sh";
+      source = ./build-info.txt;
+      target = "/nixmywindows/build-info.txt";
+    }
+    {
+      source = ./build-info.json;
+      target = "/nixmywindows/build-info.json";
     }
   ];
 
@@ -57,15 +61,15 @@
     dosfstools
     zfs
     disko
-    gum  # For rich interactive UX in install script
-    bc   # For space calculations in install script
+    gum # For rich interactive UX in install script
+    bc # For space calculations in install script
     nixos-install-tools
     util-linux
   ];
 
   # Enable SSH
   services.openssh.enable = true;
-  
+
   # Set root password (override any defaults)
   users.users.root = {
     password = "nixos";
@@ -90,7 +94,7 @@
     script = ''
       # Wait for system to be ready
       sleep 5
-      
+
       # Clear screen and show installer
       clear
       echo "🍃 nixmywindows Live Installer"
