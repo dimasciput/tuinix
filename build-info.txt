@@ -1,6 +1,6 @@
 nixmywindows Build Information
 ==============================
-Version: 1f160c1-dirty
-Build Date: 2025-12-23 09:17:52 UTC
-Commit: 1f160c1 (main)
+Version: dfb809c-dirty
+Build Date: 2025-12-23 09:47:31 UTC
+Commit: dfb809c (main)
 Builder: timlinux@abyss-laptop
