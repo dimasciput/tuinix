@@ -21,7 +21,5 @@
     initialPassword = "admin";
   };
 
-  # Enable home-manager for admin user
-  home-manager.users.admin = { pkgs, ... }: { };
 }
 
