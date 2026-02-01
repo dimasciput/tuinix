@@ -4,11 +4,11 @@
 with lib;
 
 {
-  options.nixtui.networking.wireless = {
+  options.tuinix.networking.wireless = {
     enable = mkEnableOption "Enable wireless networking";
   };
 
-  config = mkIf config.nixtui.networking.wireless.enable {
+  config = mkIf config.tuinix.networking.wireless.enable {
     # Wireless networking
     networking.wireless = {
       enable = true;

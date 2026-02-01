@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rebuild NixOS from the local nixtui flake
+# Rebuild NixOS from the local tuinix flake
 # Usage: sudo ./rebuild.sh [switch|boot|test]
 
 set -euo pipefail

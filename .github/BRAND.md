@@ -1,12 +1,12 @@
-# nixtui Brand Design Guide
+# tuinix Brand Design Guide
 
 <div align="center">
-  <img src="assets/LOGO.png" alt="nixtui logo" width="200" height="200">
+  <img src="assets/LOGO.png" alt="tuinix logo" width="200" height="200">
 </div>
 
 ## Brand Overview
 
-**nixtui** represents the convergence of African heritage, technical excellence, and terminal-first computing. Our brand embodies warmth, community, and the power of thoughtful minimalism.
+**tuinix** represents technical excellence and terminal-first computing. Our brand embodies warmth, community, and the power of thoughtful minimalism.
 
 ## Color Palette
 
@@ -15,7 +15,7 @@ Extracted from the logo, our color palette reflects earthy, warm tones that conv
 
 | Color Name | Hex Code | RGB Values | Usage |
 |------------|----------|------------|-------|
-| **Ubuntu Orange** | `#E95420` | `233, 84, 32` | Primary accent, calls-to-action |
+| **Orange** | `#E95420` | `233, 84, 32` | Primary accent, calls-to-action |
 | **Warm Brown** | `#8B4513` | `139, 69, 19` | Secondary accent, warm highlights |
 | **Deep Earth** | `#654321` | `101, 67, 33` | Text headers, strong emphasis |
 | **Sage Green** | `#87A96B` | `135, 169, 107` | Success states, terminal accents |
@@ -35,12 +35,12 @@ Extracted from the logo, our color palette reflects earthy, warm tones that conv
 ## Typography
 
 ### Primary Font: Ubuntu
-- **Rationale**: Ubuntu font honors African heritage (Ubuntu philosophy) while maintaining excellent terminal readability
+- **Rationale**: Clean, excellent readability for both headers and body text
 - **Usage**: Headers, primary text, UI elements
 - **Weights**: Light (300), Regular (400), Medium (500), Bold (700)
 
 ### Secondary Font: Noto Sans
-- **Rationale**: Google's Noto Sans provides excellent multilingual support, honoring diversity
+- **Rationale**: Excellent multilingual support
 - **Usage**: Body text, documentation
 - **Weights**: Regular (400), Medium (500), SemiBold (600)
 
@@ -49,8 +49,8 @@ Extracted from the logo, our color palette reflects earthy, warm tones that conv
 - **Usage**: Code blocks, terminal examples, technical documentation
 - **Weights**: Regular (400), Bold (700)
 
-### African-Inspired Display Font: Kalam
-- **Rationale**: Hand-written style inspired by African calligraphy traditions
+### Display Font: Kalam
+- **Rationale**: Hand-written style for a warm, approachable feel
 - **Usage**: Special headings, mascot speech bubbles, celebratory elements
 - **Weights**: Light (300), Regular (400), Bold (700)
 
@@ -58,11 +58,10 @@ Extracted from the logo, our color palette reflects earthy, warm tones that conv
 
 ### Core Principles
 
-1. **Ubuntu Philosophy**: "I am because we are" - emphasizing community and collaboration
+1. **Community First**: We're stronger together
 2. **Terminal First**: Clean, functional design that respects the command-line aesthetic
 3. **Accessible Excellence**: High contrast, readable typography, inclusive design
-4. **Cultural Respect**: Honoring African heritage without appropriation
-5. **Technical Precision**: Every element serves the user's workflow
+4. **Technical Precision**: Every element serves the user's workflow
 
 ### Visual Language
 
@@ -78,7 +77,7 @@ Extracted from the logo, our color palette reflects earthy, warm tones that conv
 1. **Primary Logo**: Full color on light backgrounds
 2. **Monochrome**: Black or white for single-color applications
 3. **Icon Only**: The face/hat symbol for small spaces
-4. **Text Only**: "nixtui" in Ubuntu font when logo isn't practical
+4. **Text Only**: "tuinix" in Ubuntu font when logo isn't practical
 
 ### Clear Space
 - Minimum clear space: 1x the height of the logo
@@ -97,7 +96,7 @@ Extracted from the logo, our color palette reflects earthy, warm tones that conv
 ## Mascot Character
 
 ### Character Description
-Our mascot represents the spirit of nixtui:
+Our mascot represents the spirit of tuinix:
 - **Name**: Nix (open to community naming)
 - **Personality**: Wise, helpful, technically savvy, warm
 - **Visual Style**: The character from our logo - friendly face with characteristic hat
@@ -106,20 +105,20 @@ Our mascot represents the spirit of nixtui:
 ### Character Guidelines
 - Always friendly and approachable
 - Never condescending or intimidating
-- Embodies the Ubuntu philosophy of community
+- Embodies community and collaboration
 - Technically knowledgeable but explains things clearly
 
 ## Application Examples
 
 ### GitHub README Badges
-- Use Ubuntu Orange (`#E95420`) as primary badge color
+- Use Orange (`#E95420`) as primary badge color
 - Terminal Black (`#1E1E1E`) for text
 - Maintain consistent badge styling across all repositories
 
 ### Terminal UI Elements
 - Primary: Terminal Black backgrounds with Sage Green highlights
 - Secondary: Warm Brown for secondary actions
-- Accent: Ubuntu Orange for important notifications
+- Accent: Orange for important notifications
 
 ### Documentation
 - Headers: Deep Earth (`#654321`) in Ubuntu font
@@ -144,10 +143,10 @@ Our mascot represents the spirit of nixtui:
 ## File Formats and Assets
 
 ### Logo Files (to be created)
-- `nixtui-logo.svg` - Primary vector format
-- `nixtui-logo.png` - Web/digital use
-- `nixtui-icon.svg` - Icon-only version
-- `nixtui-wordmark.svg` - Text-only version
+- `tuinix-logo.svg` - Primary vector format
+- `tuinix-logo.png` - Web/digital use
+- `tuinix-icon.svg` - Icon-only version
+- `tuinix-wordmark.svg` - Text-only version
 
 ### Color Swatches
 - Adobe Swatch Exchange (ASE) file
@@ -162,7 +161,7 @@ When creating assets for this project, consider these guidelines:
 - Use the warm, earthy color palette
 - Maintain clean, geometric shapes with subtle organic curves
 - Ensure high contrast for accessibility
-- Reference African geometric patterns for inspiration (respectfully)
+- Reference geometric patterns for visual interest
 
 ### For UI Elements
 - Follow the 8px grid system

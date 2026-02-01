@@ -1,8 +1,4 @@
-<div align="center">
-  <img src="assets/LOGO.png" alt="tuinix logo" width="80" height="80">
-
-  # AI/LLM Tool Policy
-</div>
+# AI/LLM Tool Policy
 
 ## Policy
 
@@ -23,13 +19,11 @@ steps, getting feedback, and iterating. Passing maintainer feedback to an LLM
 doesn't help anyone grow, and does not sustain our community.
 
 Contributors are expected to **be transparent and label contributions that
-contain substantial amounts of tool-generated content**. Our policy on labelling
-is intended to facilitate reviews, and not to track which parts of tuinix are
-generated. Contributors should note tool usage in their pull request description,
-commit message, or wherever authorship is normally indicated for the work. For
-instance, use a commit message trailer like `Assisted-by: <name of code
-assistant>`. This transparency helps the community develop best practices and
-understand the role of these new tools.
+contain substantial amounts of tool-generated content**. Contributors should note
+tool usage in their pull request description, commit message, or wherever
+authorship is normally indicated for the work. For instance, use a commit message
+trailer like `Assisted-by: <name of code assistant>`. This transparency helps the
+community develop best practices and understand the role of these new tools.
 
 This policy includes, but is not limited to, the following kinds of
 contributions:
@@ -91,10 +85,11 @@ maintainer time.
 If a maintainer judges that a contribution doesn't comply with this policy, they
 should paste the following response to request changes:
 
-> This PR doesn't appear to comply with our policy on tool-generated content,
-> and requires additional justification for why it is valuable enough to the
-> project for us to review it. Please see our AI/LLM tool policy:
-> https://timlinux.github.io/tuinix/contributing/ai-policy/
+!!! quote "Canned response"
+    This PR doesn't appear to comply with our policy on tool-generated content,
+    and requires additional justification for why it is valuable enough to the
+    project for us to review it. Please see our
+    [AI/LLM tool policy](https://timlinux.github.io/tuinix/contributing/ai-policy/).
 
 The best ways to make a change less extractive and more valuable are to reduce
 its size or complexity or to increase its usefulness to the community. These

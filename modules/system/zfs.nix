@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixtui.zfs = {
+  options.tuinix.zfs = {
     enable = mkEnableOption "Enable ZFS filesystem support";
     
     encryption = mkEnableOption "Enable ZFS encryption";
@@ -18,11 +18,11 @@ with lib;
     };
   };
 
-  config = mkIf config.nixtui.zfs.enable {
+  config = mkIf config.tuinix.zfs.enable {
     # Enable ZFS support
     boot.supportedFilesystems = [ "zfs" ];
     boot.zfs = {
-      requestEncryptionCredentials = config.nixtui.zfs.encryption;
+      requestEncryptionCredentials = config.tuinix.zfs.encryption;
       forceImportRoot = true;
     };
     
@@ -33,7 +33,7 @@ with lib;
         interval = "weekly";
       };
       
-      autoSnapshot = mkIf config.nixtui.zfs.autoSnapshot {
+      autoSnapshot = mkIf config.tuinix.zfs.autoSnapshot {
         enable = true;
         frequent = 4;
         hourly = 24;

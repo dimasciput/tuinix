@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixtui.networking.ethernet = {
+  options.tuinix.networking.ethernet = {
     enable = mkEnableOption "Enable ethernet networking";
 
     useDHCP = mkOption {
@@ -14,11 +14,11 @@ with lib;
     };
   };
 
-  config = mkIf config.nixtui.networking.ethernet.enable {
+  config = mkIf config.tuinix.networking.ethernet.enable {
     # Enable networking
     networking = {
       # Use DHCP by default
-      useDHCP = lib.mkDefault config.nixtui.networking.ethernet.useDHCP;
+      useDHCP = lib.mkDefault config.tuinix.networking.ethernet.useDHCP;
 
       # Enable systemd-networkd for network management
       useNetworkd = lib.mkDefault true;

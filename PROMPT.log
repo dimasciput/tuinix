@@ -708,3 +708,31 @@ Make it so when the user boots the live CD they land in /home/tuinix (symlinked 
   - Added programs.bash.loginShellInit to cd into /home/tuinix and source welcome.sh
   - Removed old systemd tuinix-installer service and README.txt from ISO contents
 - Updated docs (README.md, install-bare-metal.md, INSTALL.md) to reflect new paths
+
+## 2026-02-01: MkDocs Site, Release ISO Workflow, GitHub Pages
+
+### Prompt
+1. On release, automatically build installer ISO and attach to GitHub release
+2. Create a docs/ folder with MkDocs site using Material theme inspired by brand colors
+3. Migrate content from .github/docs/ into the MkDocs site
+4. Set up GitHub Pages deployment on release and docs changes
+
+### Changes Made
+- Created mkdocs.yml with Material theme, Ubuntu fonts, brand color palette, tabbed content, admonitions
+- Created docs/ with full site structure:
+  - docs/index.md (home page)
+  - docs/installation/{index,bare-metal,vm}.md
+  - docs/usage/{post-install,zfs}.md
+  - docs/contributing/{development,guidelines,ai-policy}.md
+  - docs/about/{requirements,brand}.md
+  - docs/assets/{logo.png,extra.css}
+- Created docs/assets/extra.css with brand colors (Deep Earth primary, Ubuntu Orange accent, Terminal Black dark mode, Sage Green dark accent)
+- Rewrote .github/workflows/release.yml:
+  - Fixed old nixmywindows references to use installer configuration
+  - Builds installer ISO and attaches to release
+  - Release body links to docs site
+- Created .github/workflows/docs.yml:
+  - Triggers on tag push, main branch docs changes, or manual dispatch
+  - Builds MkDocs site and deploys to GitHub Pages
+- Updated README.md links to point to docs site URLs
+- Updated AI_POLICY.md violation link to docs site

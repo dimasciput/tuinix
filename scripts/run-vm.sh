@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-# QEMU VM runner for NixTUI
+# QEMU VM runner for TuiNix
 # Usage: ./run-vm.sh [install|run]
 #   install - Boot from ISO for installation
 #   run     - Boot from disk (after installation)
 
 set -e
 
-VM_NAME="nixtui"
+VM_NAME="tuinix"
 DEFAULT_DISK_SIZE="50G"
 DEFAULT_MEMORY="8G"
 ENABLE_ENHANCED_VIRTUALIZATION="${ENABLE_ENHANCED_VIRTUALIZATION:-true}"
 DISK_FILE="$VM_NAME.qcow2"
-ISO_FILE="nixtui.v1.iso"
-CONFIG_DIR="$HOME/.config/nixtui"
+ISO_FILE="tuinix.v1.iso"
+CONFIG_DIR="$HOME/.config/tuinix"
 MEMORY_CONFIG="$CONFIG_DIR/memory"
 DISK_CONFIG="$CONFIG_DIR/disk_size"
 OVMF_VARS_FILE="$CONFIG_DIR/OVMF_VARS.fd"
@@ -104,7 +104,7 @@ inspect_disk() {
   echo "🔍 Inspecting disk contents..."
   
   # Create temporary mount point
-  local mount_point="/tmp/nixtui-inspect"
+  local mount_point="/tmp/tuinix-inspect"
   sudo mkdir -p "$mount_point"
   
   # Try to mount the disk as a loop device
@@ -235,7 +235,7 @@ fi
 
 # Simple boot mode selection
 if [ $# -eq 0 ]; then
-  echo "🖥️  NixTUI VM Launcher"
+  echo "🖥️  TuiNix VM Launcher"
   echo ""
   
   # Check if disk exists
@@ -352,10 +352,10 @@ case "$BOOT_MODE" in
     -enable-kvm \
     -m "$MEMORY" \
     $BASE_QEMU_ARGS \
-    -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=nixtui-root \
+    -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=tuinix-root \
     -cdrom "$ISO_FILE" \
     -boot order=dc,menu=on \
-    -name "NixTUI (ISO Boot)"
+    -name "TuiNix (ISO Boot)"
   ;;
 
 "harddrive")
@@ -414,21 +414,21 @@ case "$BOOT_MODE" in
         -drive if=pflash,format=raw,file="$OVMF_VARS_FILE" \
         -cpu host \
         -smp 2 \
-        -drive file="$DISK_FILE",format=qcow2,if=virtio,serial=nixtui-root \
+        -drive file="$DISK_FILE",format=qcow2,if=virtio,serial=tuinix-root \
         -netdev user,id=net0 \
         -device e1000,netdev=net0 \
         -display sdl \
         -boot c \
-        -name "NixTUI (Simple)"
+        -name "TuiNix (Simple)"
     else
       echo "Using advanced boot configuration..."
       qemu-system-x86_64 \
         -enable-kvm \
         -m "$MEMORY" \
         $BASE_QEMU_ARGS \
-        -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=nixtui-root \
+        -drive file="$DISK_FILE",format=qcow2,if=virtio,cache=writethrough,serial=tuinix-root \
         -boot order=c,menu=on \
-        -name "NixTUI" \
+        -name "TuiNix" \
         -serial stdio \
         -no-reboot
     fi

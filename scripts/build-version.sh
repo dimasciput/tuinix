@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Generate build version and timestamp for nixtui ISO
+# Generate build version and timestamp for tuinix ISO
 set -euo pipefail
 
 # Get version from environment or git
-VERSION="${NIXTUI_VERSION:-$(git describe --tags --always --dirty 2>/dev/null || echo "dev-$(date +%Y%m%d)")}"
+VERSION="${TUINIX_VERSION:-$(git describe --tags --always --dirty 2>/dev/null || echo "dev-$(date +%Y%m%d)")}"
 
 # Generate timestamp
 TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
@@ -20,7 +20,7 @@ fi
 
 # Create simple text version for easy reading
 cat >build-info.txt <<EOF
-nixtui Build Information
+tuinix Build Information
 ==============================
 Version: $VERSION
 Build Date: $TIMESTAMP

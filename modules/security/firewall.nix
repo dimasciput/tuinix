@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixtui.security.firewall = {
+  options.tuinix.security.firewall = {
     enable = mkEnableOption "Enable firewall";
     
     allowedTCPPorts = mkOption {
@@ -20,11 +20,11 @@ with lib;
     };
   };
 
-  config = mkIf config.nixtui.security.firewall.enable {
+  config = mkIf config.tuinix.security.firewall.enable {
     networking.firewall = {
       enable = true;
-      allowedTCPPorts = config.nixtui.security.firewall.allowedTCPPorts;
-      allowedUDPPorts = config.nixtui.security.firewall.allowedUDPPorts;
+      allowedTCPPorts = config.tuinix.security.firewall.allowedTCPPorts;
+      allowedUDPPorts = config.tuinix.security.firewall.allowedUDPPorts;
       
       # Default deny policy
       rejectPackets = true;

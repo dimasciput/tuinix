@@ -1,6 +1,6 @@
 # Assets Directory
 
-This directory contains visual assets for the nixtui project.
+This directory contains visual assets for the tuinix project.
 
 ## Current Assets
 
@@ -29,10 +29,10 @@ This directory contains visual assets for the nixtui project.
 
 ### File Naming Convention
 Once processed, use this naming:
-- `nixtui-logo.svg` - Main vector logo
-- `nixtui-logo-transparent.png` - PNG with transparent background
-- `nixtui-icon.svg` - Icon-only version
-- `nixtui-wordmark.svg` - Text-only version
+- `tuinix-logo.svg` - Main vector logo
+- `tuinix-logo-transparent.png` - PNG with transparent background
+- `tuinix-icon.svg` - Icon-only version
+- `tuinix-wordmark.svg` - Text-only version
 
 ## Brand Consistency
 All assets should follow the guidelines in [BRAND.md](../BRAND.md) for:

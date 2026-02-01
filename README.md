@@ -23,6 +23,9 @@
 [![Nix](https://img.shields.io/badge/built%20with-nix-blue.svg)](https://nixos.org/)
 [![ZFS](https://img.shields.io/badge/filesystem-ZFS-orange.svg)](https://openzfs.org/)
 
+<!-- Documentation -->
+[![Docs](https://img.shields.io/badge/docs-timlinux.github.io%2Ftuinix-blue.svg)](https://timlinux.github.io/tuinix/)
+
 <!-- Community -->
 [![Contributors](https://img.shields.io/github/contributors/timlinux/tuinix.svg)](https://github.com/timlinux/tuinix/graphs/contributors)
 [![Issues](https://img.shields.io/github/issues/timlinux/tuinix.svg)](https://github.com/timlinux/tuinix/issues)
@@ -34,7 +37,7 @@ A terminal-centric Linux distribution built on NixOS with ZFS encryption. No des
 
 ---
 
-> <img src=".github/assets/LOGO.png" width="24"> **Ready to install? Jump straight to the [Installation Guide](#2-installation-environment).**
+> <img src=".github/assets/LOGO.png" width="24"> **Ready to install? Jump straight to the [Installation Guide](https://timlinux.github.io/tuinix/installation/).**
 
 ---
 
@@ -62,7 +65,7 @@ cd tuinix
 nix flake check                 # Validate the flake
 ```
 
-> <img src=".github/assets/LOGO.png" width="20"> Full details: [Development Guide](.github/docs/development.md)
+> <img src=".github/assets/LOGO.png" width="20"> Full details: [Development Guide](https://timlinux.github.io/tuinix/contributing/development/)
 
 ---
 
@@ -82,7 +85,7 @@ Best for testing or trying tuinix without touching your hardware. Key requiremen
 - Disk serial number configured (for ZFS pool import)
 - At least 4 GB RAM and 20 GB disk
 
-> <img src=".github/assets/LOGO.png" width="20"> Full details: [VM Installation Guide](.github/docs/install-vm.md)
+> <img src=".github/assets/LOGO.png" width="20"> Full details: [VM Installation Guide](https://timlinux.github.io/tuinix/installation/vm/)
 
 #### Bare Metal
 
@@ -101,7 +104,7 @@ Boot from USB -- you'll land in `/home/tuinix` with a welcome message. Run:
 sudo scripts/install.sh
 ```
 
-> <img src=".github/assets/LOGO.png" width="20"> Full details: [Bare Metal Installation Guide](.github/docs/install-bare-metal.md)
+> <img src=".github/assets/LOGO.png" width="20"> Full details: [Bare Metal Installation Guide](https://timlinux.github.io/tuinix/installation/bare-metal/)
 
 ---
 
@@ -122,7 +125,7 @@ cd ~/tuinix
 sudo nixos-rebuild switch --flake .#$(hostname)
 ```
 
-> <img src=".github/assets/LOGO.png" width="20"> Full details: [Post-Install Guide](.github/docs/post-install.md)
+> <img src=".github/assets/LOGO.png" width="20"> Full details: [Post-Install Guide](https://timlinux.github.io/tuinix/usage/post-install/)
 
 ---
 
@@ -144,14 +147,15 @@ We welcome contributions. See the [Contributing Guide](.github/CONTRIBUTING.md) 
 
 ## Documentation
 
+Full documentation is available at **[timlinux.github.io/tuinix](https://timlinux.github.io/tuinix/)**.
+
 | Document | Description |
 |----------|-------------|
-| [Development Guide](.github/docs/development.md) | Building, testing, and contributing |
-| [VM Installation](.github/docs/install-vm.md) | Installing in a virtual machine |
-| [Bare Metal Installation](.github/docs/install-bare-metal.md) | Installing on physical hardware |
-| [Post-Install Guide](.github/docs/post-install.md) | Using your new system |
-| [Brand Guidelines](.github/BRAND.md) | Visual identity and design |
-| [Requirements](.github/docs/REQUIREMENTS.md) | Original project vision |
+| [Installation Guide](https://timlinux.github.io/tuinix/installation/) | Bare metal and VM installation |
+| [Post-Install Guide](https://timlinux.github.io/tuinix/usage/post-install/) | First boot and daily usage |
+| [ZFS Management](https://timlinux.github.io/tuinix/usage/zfs/) | Snapshots, scrubs, and recovery |
+| [Development Guide](https://timlinux.github.io/tuinix/contributing/development/) | Building, testing, and contributing |
+| [AI/LLM Policy](https://timlinux.github.io/tuinix/contributing/ai-policy/) | Tool-assisted contribution guidelines |
 
 ## License
 

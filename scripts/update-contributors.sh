@@ -7,13 +7,13 @@
 # CONTRIBUTORS_END markers.
 #
 # Usage: ./scripts/update-contributors.sh [owner] [repo]
-#   Default: timlinux nixtui
+#   Default: timlinux tuinix
 
 set -euo pipefail
 
 # Configuration
 OWNER="${1:-timlinux}"
-REPO="${2:-nixtui}"
+REPO="${2:-tuinix}"
 README_FILE="README.md"
 
 # Colors for output

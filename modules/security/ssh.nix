@@ -4,7 +4,7 @@
 with lib;
 
 {
-  options.nixtui.security.ssh = {
+  options.tuinix.security.ssh = {
     enable = mkEnableOption "Enable SSH server";
     
     port = mkOption {
@@ -26,14 +26,14 @@ with lib;
     };
   };
 
-  config = mkIf config.nixtui.security.ssh.enable {
+  config = mkIf config.tuinix.security.ssh.enable {
     services.openssh = {
       enable = true;
-      ports = [ config.nixtui.security.ssh.port ];
+      ports = [ config.tuinix.security.ssh.port ];
       
       settings = {
-        PermitRootLogin = config.nixtui.security.ssh.permitRootLogin;
-        PasswordAuthentication = config.nixtui.security.ssh.passwordAuthentication;
+        PermitRootLogin = config.tuinix.security.ssh.permitRootLogin;
+        PasswordAuthentication = config.tuinix.security.ssh.passwordAuthentication;
         
         # Security hardening
         Protocol = 2;
@@ -45,8 +45,8 @@ with lib;
     };
     
     # Add SSH port to firewall if enabled
-    nixtui.security.firewall.allowedTCPPorts = 
-      mkIf config.nixtui.security.firewall.enable 
-        [ config.nixtui.security.ssh.port ];
+    tuinix.security.firewall.allowedTCPPorts = 
+      mkIf config.tuinix.security.firewall.enable 
+        [ config.tuinix.security.ssh.port ];
   };
 }
