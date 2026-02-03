@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -19,16 +20,44 @@ import (
 	"golang.org/x/term"
 )
 
-// Brand colors
+// Log file for installation diagnostics
+const logFile = "/tmp/tuinix-install.log"
+
+var logger *log.Logger
+
+func initLogger() {
+	f, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		// Fall back to stderr if we can't create log file
+		logger = log.New(os.Stderr, "[tuinix] ", log.LstdFlags)
+		return
+	}
+	logger = log.New(f, "", log.LstdFlags)
+}
+
+func logInfo(format string, args ...interface{}) {
+	if logger != nil {
+		logger.Printf("[INFO] "+format, args...)
+	}
+}
+
+func logError(format string, args ...interface{}) {
+	if logger != nil {
+		logger.Printf("[ERROR] "+format, args...)
+	}
+}
+
+// Brand colors - used sparingly for emphasis
 var (
-	colorOrange  = lipgloss.Color("#E95420") // Primary brand
-	colorNixBlue = lipgloss.Color("#5277C3") // Info/prompts
+	colorOrange  = lipgloss.Color("#E95420") // Primary brand accent
+	colorNixBlue = lipgloss.Color("#5277C3") // Info accent
 	colorGreen   = lipgloss.Color("#28A745") // Success
 	colorRed     = lipgloss.Color("#DC3545") // Errors
 	colorAmber   = lipgloss.Color("#FFC107") // Warnings
 	colorEarth   = lipgloss.Color("#654321") // Details
-	colorWhite   = lipgloss.Color("#FFFFFF")
-	colorGray    = lipgloss.Color("#666666")
+	colorOffWhite = lipgloss.Color("#D4D4D4") // Default text
+	colorDimGray  = lipgloss.Color("#808080") // Secondary text
+	colorDarkGray = lipgloss.Color("#555555") // Borders, subtle elements
 )
 
 // Pre-rendered ASCII mascot logo (compact version for header)
@@ -110,6 +139,8 @@ const (
 	stateEmail
 	stateHostname
 	stateDisk
+	statePassphrase
+	statePassphraseConfirm
 	stateLocale
 	stateKeymap
 	stateSummary
@@ -203,6 +234,34 @@ ZFS datasets created:
 • NIXROOT/home - User data`,
 		stepNum: 5,
 	},
+	statePassphrase: {
+		title: "ZFS Encryption Passphrase",
+		description: `Set the encryption passphrase for your
+ZFS pool.
+
+This passphrase will be required every
+time you boot the system. It protects
+all data on disk with AES-256-GCM
+encryption.
+
+Requirements:
+• At least 8 characters
+• Use a strong, memorable passphrase
+• You will be prompted to confirm it
+
+If you forget this passphrase, your
+data cannot be recovered.`,
+		stepNum: 6,
+	},
+	statePassphraseConfirm: {
+		title: "Confirm Passphrase",
+		description: `Please re-enter your ZFS encryption
+passphrase to confirm.
+
+Make sure you remember this passphrase.
+You will need it every time you boot.`,
+		stepNum: 7,
+	},
 	stateLocale: {
 		title: "System Locale",
 		description: `Select your system locale.
@@ -215,7 +274,7 @@ This configures:
 
 The locale affects terminal output,
 file sorting, and application behavior.`,
-		stepNum: 6,
+		stepNum: 8,
 	},
 	stateKeymap: {
 		title: "Keyboard Layout",
@@ -230,7 +289,7 @@ Common layouts:
 • uk - UK English
 • de - German (QWERTZ)
 • fr - French (AZERTY)`,
-		stepNum: 7,
+		stepNum: 9,
 	},
 	stateSummary: {
 		title: "Review Configuration",
@@ -246,7 +305,7 @@ After confirmation, the installer will:
 This process takes 10-30 minutes
 depending on your hardware and
 internet connection speed.`,
-		stepNum: 8,
+		stepNum: 10,
 	},
 	stateConfirm: {
 		title: "Final Confirmation",
@@ -259,11 +318,11 @@ This action cannot be undone.
 
 To proceed, type DESTROY exactly.
 To cancel, press Ctrl+C or q.`,
-		stepNum: 9,
+		stepNum: 11,
 	},
 }
 
-const totalSteps = 9
+const totalSteps = 11
 
 // Config holds all installation configuration
 type Config struct {
@@ -273,6 +332,7 @@ type Config struct {
 	Hostname    string
 	Disk        string
 	HostID      string
+	Passphrase  string
 	Locale      string
 	Keymap      string
 	SpaceBoot   string
@@ -527,7 +587,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Update text input for input states
 	if m.state == stateUsername || m.state == stateFullname ||
-		m.state == stateEmail || m.state == stateHostname || m.state == stateConfirm {
+		m.state == stateEmail || m.state == stateHostname ||
+		m.state == statePassphrase || m.state == statePassphraseConfirm ||
+		m.state == stateConfirm {
 		m.input, cmd = m.input.Update(msg)
 		cmds = append(cmds, cmd)
 	}
@@ -674,9 +736,38 @@ func (m model) handleEnter() (tea.Model, tea.Cmd) {
 		if len(m.disks) > 0 {
 			m.config.Disk = m.disks[m.selectedIdx].Path
 			m.config.HostID = generateHostID()
-			m.state = stateLocale
-			m.selectedIdx = 0
+			m.state = statePassphrase
+			m.input.SetValue("")
+			m.input.Placeholder = "Enter ZFS encryption passphrase"
+			m.input.EchoMode = textinput.EchoPassword
+			m.input.EchoCharacter = '*'
 		}
+
+	case statePassphrase:
+		val := m.input.Value()
+		if len(val) < 8 {
+			m.err = fmt.Errorf("passphrase must be at least 8 characters")
+			return m, nil
+		}
+		m.config.Passphrase = val
+		m.err = nil
+		m.state = statePassphraseConfirm
+		m.input.SetValue("")
+		m.input.Placeholder = "Re-enter passphrase to confirm"
+
+	case statePassphraseConfirm:
+		val := m.input.Value()
+		if val != m.config.Passphrase {
+			m.err = fmt.Errorf("passphrases do not match")
+			m.input.SetValue("")
+			return m, nil
+		}
+		m.err = nil
+		m.state = stateLocale
+		m.input.SetValue("")
+		m.input.EchoMode = textinput.EchoNormal
+		m.input.EchoCharacter = 0
+		m.selectedIdx = 0
 
 	case stateLocale:
 		m.config.Locale = m.locales[m.selectedIdx]
@@ -863,7 +954,7 @@ func (m model) renderRightPanel(stepNum int) string {
 	var content string
 
 	switch m.state {
-	case stateUsername, stateFullname, stateEmail, stateHostname, stateConfirm:
+	case stateUsername, stateFullname, stateEmail, stateHostname, statePassphrase, statePassphraseConfirm, stateConfirm:
 		inputBox := lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(colorNixBlue).
@@ -1359,12 +1450,24 @@ func tick() tea.Cmd {
 }
 
 func runCommand(name string, args ...string) (string, error) {
+	cmdStr := name + " " + strings.Join(args, " ")
+	logInfo("Running command: %s", cmdStr)
+
 	cmd := exec.Command(name, args...)
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
 	output := stdout.String() + stderr.String()
+
+	if err != nil {
+		logError("Command failed: %s\nError: %v\nOutput: %s", cmdStr, err, output)
+	} else {
+		logInfo("Command succeeded: %s", cmdStr)
+		if output != "" {
+			logInfo("Output: %s", output)
+		}
+	}
 	return output, err
 }
 
@@ -1372,56 +1475,111 @@ func runCommand(name string, args ...string) (string, error) {
 
 func runInstallation(c Config) tea.Cmd {
 	return func() tea.Msg {
+		logInfo("=== Starting installation ===")
+		logInfo("Config: Username=%s, Hostname=%s, Disk=%s", c.Username, c.Hostname, c.Disk)
+		logInfo("Config: ProjectRoot=%s, WorkDir=%s", c.ProjectRoot, c.WorkDir)
+
+		logInfo("Step 1: Generating host configuration...")
 		if err := generateHostConfig(c); err != nil {
+			logError("generateHostConfig failed: %v", err)
 			return installErrMsg{err: fmt.Errorf("generate host config: %w", err)}
 		}
+		logInfo("Step 1 complete")
 
+		logInfo("Step 2: Formatting disk...")
 		if err := formatDisk(c); err != nil {
+			logError("formatDisk failed: %v", err)
 			return installErrMsg{err: fmt.Errorf("format disk: %w", err)}
 		}
+		logInfo("Step 2 complete")
 
+		logInfo("Step 3: Generating hardware config...")
 		if err := generateHardwareConfig(c); err != nil {
+			logError("generateHardwareConfig failed: %v", err)
 			return installErrMsg{err: fmt.Errorf("generate hardware config: %w", err)}
 		}
+		logInfo("Step 3 complete")
 
+		logInfo("Step 4: Installing NixOS...")
 		if err := installNixOS(c); err != nil {
+			logError("installNixOS failed: %v", err)
 			return installErrMsg{err: fmt.Errorf("install nixos: %w", err)}
 		}
+		logInfo("Step 4 complete")
 
+		logInfo("Step 5: Configuring ZFS boot...")
 		if err := configureZFSBoot(c); err != nil {
+			logError("configureZFSBoot failed: %v", err)
 			return installErrMsg{err: fmt.Errorf("configure zfs boot: %w", err)}
 		}
+		logInfo("Step 5 complete")
 
+		logInfo("Step 6: Copying flake...")
 		if err := copyFlake(c); err != nil {
+			logError("copyFlake failed: %v", err)
 			return installErrMsg{err: fmt.Errorf("copy flake: %w", err)}
 		}
+		logInfo("Step 6 complete")
 
+		logInfo("Step 7: Setting up user flake...")
 		if err := setupUserFlake(c); err != nil {
+			logError("setupUserFlake failed: %v", err)
 			return installErrMsg{err: fmt.Errorf("setup user flake: %w", err)}
 		}
+		logInfo("Step 7 complete")
 
+		logInfo("Step 8: Finalizing ZFS pool...")
 		if err := finalizeZFSPool(c); err != nil {
+			logError("finalizeZFSPool failed: %v", err)
 			return installErrMsg{err: fmt.Errorf("finalize zfs pool: %w", err)}
 		}
+		logInfo("Step 8 complete")
 
+		logInfo("=== Installation complete ===")
 		return installDoneMsg{}
 	}
 }
 
 func generateHostConfig(c Config) error {
+	logInfo("generateHostConfig: starting")
 	workDir := c.WorkDir
+	logInfo("generateHostConfig: removing old workDir %s", workDir)
 	os.RemoveAll(workDir)
 
-	if _, err := runCommand("cp", "-r", c.ProjectRoot, workDir); err != nil {
-		return fmt.Errorf("copy project: %w", err)
+	// Create work directory
+	logInfo("generateHostConfig: creating workDir %s", workDir)
+	if err := os.MkdirAll(workDir, 0755); err != nil {
+		return fmt.Errorf("create work dir: %w", err)
 	}
 
+	// Check if project root exists
+	logInfo("generateHostConfig: checking ProjectRoot %s", c.ProjectRoot)
+	if _, err := os.Stat(c.ProjectRoot); os.IsNotExist(err) {
+		return fmt.Errorf("project root does not exist: %s", c.ProjectRoot)
+	}
+
+	// List contents of project root
+	entries, _ := os.ReadDir(c.ProjectRoot)
+	logInfo("generateHostConfig: ProjectRoot contents: %d entries", len(entries))
+	for _, e := range entries {
+		logInfo("  - %s", e.Name())
+	}
+
+	// Copy project files, dereferencing symlinks with -L
+	logInfo("generateHostConfig: copying project files...")
+	if _, err := runCommand("cp", "-rL", c.ProjectRoot+"/.", workDir+"/"); err != nil {
+		return fmt.Errorf("copy project from %s to %s: %w", c.ProjectRoot, workDir, err)
+	}
+	logInfo("generateHostConfig: copy complete")
+
 	hostDir := filepath.Join(workDir, "hosts", c.Hostname)
+	logInfo("generateHostConfig: creating hostDir %s", hostDir)
 	if err := os.MkdirAll(hostDir, 0755); err != nil {
 		return fmt.Errorf("create host dir: %w", err)
 	}
 
 	usersDir := filepath.Join(workDir, "users")
+	logInfo("generateHostConfig: usersDir is %s", usersDir)
 
 	userNix := fmt.Sprintf(`# User configuration for %s
 # Generated by tuinix installer on %s
@@ -1540,15 +1698,29 @@ func generateHostConfig(c Config) error {
 }
 
 func formatDisk(c Config) error {
+	logInfo("formatDisk: starting")
 	hostDir := filepath.Join(c.WorkDir, "hosts", c.Hostname)
 	diskoConfig := filepath.Join(hostDir, "disks.nix")
+	logInfo("formatDisk: diskoConfig = %s", diskoConfig)
 
+	// Check if disko config exists
+	if _, err := os.Stat(diskoConfig); os.IsNotExist(err) {
+		return fmt.Errorf("disko config does not exist: %s", diskoConfig)
+	}
+
+	// Log disko config contents
+	diskoContent, _ := os.ReadFile(diskoConfig)
+	logInfo("formatDisk: disks.nix contents:\n%s", string(diskoContent))
+
+	logInfo("formatDisk: removing /etc/hostid")
 	os.Remove("/etc/hostid")
 
+	logInfo("formatDisk: running zgenhostid %s", c.HostID)
 	if _, err := runCommand("zgenhostid", c.HostID); err != nil {
 		return fmt.Errorf("zgenhostid: %w", err)
 	}
 
+	logInfo("formatDisk: unmounting partitions on %s", c.Disk)
 	lsblkOutput, _ := runCommand("lsblk", "-nr", "-o", "NAME", c.Disk)
 	partitions := strings.Split(lsblkOutput, "\n")
 	for i, part := range partitions {
@@ -1556,14 +1728,27 @@ func formatDisk(c Config) error {
 			continue
 		}
 		partPath := "/dev/" + strings.TrimSpace(part)
+		logInfo("formatDisk: unmounting %s", partPath)
 		runCommand("umount", partPath)
 	}
 
+	logInfo("formatDisk: exporting all zpools")
 	runCommand("zpool", "export", "-a")
 
-	if _, err := runCommand("disko", "--mode", "disko", diskoConfig); err != nil {
+	logInfo("formatDisk: running disko --mode disko %s (piping passphrase for ZFS encryption)", diskoConfig)
+	// Pipe the passphrase to disko's stdin for ZFS encryption
+	// ZFS prompts for passphrase twice (enter + confirm), so we send it twice
+	diskoCmd := exec.Command("disko", "--mode", "disko", diskoConfig)
+	passInput := c.Passphrase + "\n" + c.Passphrase + "\n"
+	diskoCmd.Stdin = strings.NewReader(passInput)
+	var diskoOut, diskoErr bytes.Buffer
+	diskoCmd.Stdout = &diskoOut
+	diskoCmd.Stderr = &diskoErr
+	if err := diskoCmd.Run(); err != nil {
+		logError("formatDisk: disko failed: %v\nstdout: %s\nstderr: %s", err, diskoOut.String(), diskoErr.String())
 		return fmt.Errorf("disko failed: %w", err)
 	}
+	logInfo("formatDisk: disko completed successfully")
 
 	return nil
 }
@@ -1749,9 +1934,12 @@ func finalizeZFSPool(c Config) error {
 }
 
 func main() {
+	initLogger()
+	logInfo("tuinix installer started")
+
 	if os.Geteuid() != 0 {
 		fmt.Println(errorStyle.Render("! This installer must be run as root"))
-		fmt.Println(grayStyle.Render("  Use: sudo tuinix-installer"))
+		fmt.Println(grayStyle.Render("  Use: sudo installer"))
 		os.Exit(1)
 	}
 
@@ -1759,7 +1947,9 @@ func main() {
 
 	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
+		logError("Program error: %v", err)
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
+	logInfo("Installer finished")
 }
