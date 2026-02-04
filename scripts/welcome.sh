@@ -32,15 +32,22 @@ show_mascot() {
 
 show_mascot
 
-# Show welcome message with gum
+# Show welcome message centered on screen
+cols=$(tput cols 2>/dev/null || echo 80)
+box_width=60
+h_margin=$(( (cols - box_width - 2) / 2 ))
+if [ "$h_margin" -lt 0 ]; then
+  h_margin=0
+fi
+
 if command -v gum &>/dev/null; then
   gum style \
-    --border double \
+    --border rounded \
     --border-foreground 208 \
     --padding "1 3" \
-    --margin "1 0" \
+    --margin "1 ${h_margin}" \
     --align center \
-    --width 60 \
+    --width ${box_width} \
     "Welcome to the tuinix Live Installer" \
     "" \
     "To install tuinix, run:" \
@@ -49,16 +56,17 @@ if command -v gum &>/dev/null; then
     "" \
     "You are in: ${TUINIX_DIR}"
 else
+  padding=$(printf '%*s' "$h_margin" '')
   echo ""
-  echo "=========================================="
-  echo "  Welcome to the tuinix Live Installer"
-  echo "=========================================="
-  echo ""
-  echo "  To install tuinix, run:"
-  echo ""
-  echo "    sudo installer"
-  echo ""
-  echo "  You are in: ${TUINIX_DIR}"
-  echo "=========================================="
+  echo "${padding}=========================================="
+  echo "${padding}  Welcome to the tuinix Live Installer"
+  echo "${padding}=========================================="
+  echo "${padding}"
+  echo "${padding}  To install tuinix, run:"
+  echo "${padding}"
+  echo "${padding}    sudo installer"
+  echo "${padding}"
+  echo "${padding}  You are in: ${TUINIX_DIR}"
+  echo "${padding}=========================================="
   echo ""
 fi
