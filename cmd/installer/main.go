@@ -362,8 +362,9 @@ type Config struct {
 	Disk        string
 	HostID      string
 	Passphrase  string
-	Locale      string
-	Keymap      string
+	Locale        string
+	Keymap        string
+	ConsoleKeyMap string
 	SpaceBoot   string
 	SpaceNix    string
 	SpaceHome   string
@@ -401,6 +402,12 @@ type diskInfo struct {
 	Model string
 }
 
+type keymapEntry struct {
+	Label      string // Display label (e.g. "us", "pt")
+	XKBLayout  string // X11/Wayland layout (e.g. "us", "pt")
+	ConsoleMap string // Linux console keymap (e.g. "us", "pt-latin1")
+}
+
 // Model is the main application model
 type model struct {
 	state       installState
@@ -414,7 +421,7 @@ type model struct {
 	disks       []diskInfo
 	selectedIdx int
 	locales     []string
-	keymaps     []string
+	keymaps     []keymapEntry
 
 	// Animation state
 	fireParticles []fireParticle
@@ -456,7 +463,15 @@ func initialModel() model {
 		input:    ti,
 		viewport: vp,
 		locales:  []string{"en_US.UTF-8", "en_GB.UTF-8", "pt_PT.UTF-8", "pt_BR.UTF-8", "de_DE.UTF-8", "fr_FR.UTF-8", "es_ES.UTF-8"},
-		keymaps:  []string{"us", "uk", "pt", "br", "de", "fr", "es"},
+		keymaps: []keymapEntry{
+			{Label: "us", XKBLayout: "us", ConsoleMap: "us"},
+			{Label: "uk", XKBLayout: "gb", ConsoleMap: "uk"},
+			{Label: "pt", XKBLayout: "pt", ConsoleMap: "pt-latin1"},
+			{Label: "br", XKBLayout: "br", ConsoleMap: "br-abnt2"},
+			{Label: "de", XKBLayout: "de", ConsoleMap: "de-latin1"},
+			{Label: "fr", XKBLayout: "fr", ConsoleMap: "fr-latin1"},
+			{Label: "es", XKBLayout: "es", ConsoleMap: "es"},
+		},
 		config: Config{
 			ZFSPoolName: "NIXROOT",
 			SpaceBoot:   "5G",
@@ -833,7 +848,9 @@ func (m model) handleEnter() (tea.Model, tea.Cmd) {
 		m.selectedIdx = 0
 
 	case stateKeymap:
-		m.config.Keymap = m.keymaps[m.selectedIdx]
+		km := m.keymaps[m.selectedIdx]
+		m.config.Keymap = km.XKBLayout
+		m.config.ConsoleKeyMap = km.ConsoleMap
 		calculateSpaceAllocation(&m.config)
 		m.state = stateSummary
 
@@ -1066,14 +1083,14 @@ func (m model) renderRightPanel(stepNum int) string {
 
 	case stateKeymap:
 		var optList strings.Builder
-		for i, opt := range m.keymaps {
+		for i, km := range m.keymaps {
 			cursor := "  "
 			style := lipgloss.NewStyle().Foreground(colorOffWhite)
 			if i == m.selectedIdx {
 				cursor = "> "
 				style = style.Foreground(colorOrange).Bold(true)
 			}
-			optList.WriteString(style.Render(cursor + opt))
+			optList.WriteString(style.Render(cursor + km.Label))
 			optList.WriteString("\n")
 		}
 		hint := grayStyle.Render("\nUp/Down to select | Enter to confirm")
@@ -1722,7 +1739,7 @@ func generateHostConfig(c Config) error {
   services.xserver.xkb.layout = "%s";
   console.keyMap = "%s";
 }
-`, c.Username, c.Locale, c.Keymap, c.Keymap)
+`, c.Username, c.Locale, c.Keymap, c.ConsoleKeyMap)
 
 	if err := os.WriteFile(filepath.Join(hostDir, "default.nix"), []byte(defaultNix), 0644); err != nil {
 		return fmt.Errorf("write default.nix: %w", err)
