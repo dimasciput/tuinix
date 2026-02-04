@@ -50,17 +50,22 @@ so you can commit changes immediately without any additional setup.
 ```bash
 cd ~/tuinix
 # Edit your host config in hosts/$(hostname)/
-sudo nixos-rebuild switch --flake .#$(hostname)
+./scripts/rebuild.sh
 # Commit your changes
 git add -A && git commit -m "Describe your change"
 ```
+
+The `rebuild.sh` script in `scripts/` handles the full rebuild cycle: it
+runs `nixos-rebuild switch` with your local flake and optionally cleans
+up old generations and runs garbage collection afterwards. It also
+accepts `boot` or `test` as an argument instead of the default `switch`.
 
 ### Pulling upstream updates
 
 ```bash
 cd ~/tuinix
 git pull --rebase
-sudo nixos-rebuild switch --flake .#$(hostname)
+./scripts/rebuild.sh
 ```
 
 ### Rolling back

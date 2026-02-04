@@ -1732,8 +1732,15 @@ func generateHostConfig(c Config) error {
   networking.hostName = hostname;
   system.stateVersion = "25.11";
 
+  environment.systemPackages = with pkgs; [
+    vim
+    git
+  ];
+
   tuinix.zfs.enable = true;
   tuinix.zfs.encryption = true;
+
+  boot.consoleLogLevel = 3;
 
   i18n.defaultLocale = "%s";
   services.xserver.xkb.layout = "%s";
