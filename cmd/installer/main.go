@@ -72,6 +72,9 @@ var mascotLogo string
 //go:embed logo-large.txt
 var mascotLogoLarge string
 
+//go:embed version.txt
+var versionInfo string
+
 // Figlet-style TUINIX title
 const tuinixTitle = `████████╗██╗   ██╗██╗███╗   ██╗██╗██╗  ██╗
 ╚══██╔══╝██║   ██║██║████╗  ██║██║╚██╗██╔╝
@@ -597,7 +600,8 @@ type networkCheckMsg struct {
 	ok bool
 }
 type logTailMsg struct {
-	lines []string
+	lines       []string
+	currentStep int
 }
 
 func initialModel() model {
@@ -806,8 +810,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case logTailMsg:
 		m.logTail = msg.lines
+		if msg.currentStep >= 0 {
+			m.installStep = msg.currentStep
+		}
 		if m.state == stateInstalling {
-			return m, pollLogTail()
+			return m, pollLogTail(m.config.StorageMode.isZFS())
 		}
 		return m, nil
 	}
@@ -912,7 +919,7 @@ func (m model) handleTick() (tea.Model, tea.Cmd) {
 		return m, tick()
 
 	case stateInstalling:
-		return m, tea.Batch(tick(), pollLogTail())
+		return m, tea.Batch(tick(), pollLogTail(m.config.StorageMode.isZFS()))
 	}
 
 	return m, nil
@@ -1222,13 +1229,15 @@ func (m model) renderStepIndicator(stepNum int) string {
 	return stepStyle.Width(m.width - 4).Render(indicator)
 }
 
-// renderFooter creates the footer with horizontal line and URL
+// renderFooter creates the footer with horizontal line, version, and URL
 func (m model) renderFooter() string {
 	line := strings.Repeat("─", m.width-4)
+	version := strings.TrimSpace(versionInfo)
 	url := "https://github.com/timlinux/tuinix"
+	footerText := fmt.Sprintf("%s  |  %s", version, url)
 	return lipgloss.JoinVertical(lipgloss.Center,
 		grayStyle.Render(line),
-		footerStyle.Width(m.width-4).Render(url),
+		footerStyle.Width(m.width-4).Render(footerText),
 	)
 }
 
@@ -2080,19 +2089,35 @@ func checkNetwork() tea.Cmd {
 	}
 }
 
-func pollLogTail() tea.Cmd {
+func pollLogTail(isZFS bool) tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(time.Second)
 		data, err := os.ReadFile(logFile)
 		if err != nil {
-			return logTailMsg{lines: nil}
+			return logTailMsg{lines: nil, currentStep: -1}
 		}
-		lines := strings.Split(strings.TrimSpace(string(data)), "\n")
+		content := strings.TrimSpace(string(data))
+		lines := strings.Split(content, "\n")
 		start := len(lines) - 3
 		if start < 0 {
 			start = 0
 		}
-		return logTailMsg{lines: lines[start:]}
+
+		// Parse log to determine current step based on "Step X complete" messages
+		// The log writes "Step X complete" after each step finishes
+		currentStep := 0
+		stepCompleteRe := regexp.MustCompile(`Step (\d+) complete`)
+		for _, line := range lines {
+			if matches := stepCompleteRe.FindStringSubmatch(line); len(matches) > 1 {
+				var step int
+				fmt.Sscanf(matches[1], "%d", &step)
+				if step > currentStep {
+					currentStep = step
+				}
+			}
+		}
+
+		return logTailMsg{lines: lines[start:], currentStep: currentStep}
 	}
 }
 
