@@ -64,7 +64,7 @@ var (
 			Foreground(colorDimGray)
 
 	borderStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
+			Border(lipgloss.NormalBorder()).
 			BorderForeground(colorDarkGray)
 
 	headerTitleStyle = lipgloss.NewStyle().

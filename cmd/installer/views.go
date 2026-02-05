@@ -291,7 +291,7 @@ func (m model) viewInstalling() string {
 	var logTailDisplay string
 	if len(m.logTail) > 0 {
 		logBox := lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
+			Border(lipgloss.NormalBorder()).
 			BorderForeground(colorDarkGray).
 			Foreground(colorDimGray).
 			Width(m.width - 8).

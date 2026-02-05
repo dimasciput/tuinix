@@ -72,7 +72,7 @@ func (m model) renderRightPanel(stepNum int) string {
 	switch m.state {
 	case stateUsername, stateFullname, stateEmail, statePassword, statePasswordConfirm, stateHostname, statePassphrase, statePassphraseConfirm, stateGitHubUser, stateConfirm:
 		inputBox := lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
+			Border(lipgloss.NormalBorder()).
 			BorderForeground(colorNixBlue).
 			Padding(0, 1).
 			Render(m.input.View())
